@@ -23,7 +23,7 @@ import us.fatehi.utility.datasource.DatabaseConnectionSource;
 import us.fatehi.utility.datasource.DatabaseConnectionSources;
 import us.fatehi.utility.datasource.MultiUseUserCredentials;
 
-public final class Main {
+public final class Issue1460 {
 
   public static void main(String[] args) throws SchemaCrawlerException {
 
@@ -31,19 +31,21 @@ public final class Main {
     try {
       new LoggingConfig(Level.SEVERE);
 
-      final LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder.builder()
-          // I don't know why but sql server version need .dbo to get only table what I created
-          // ANSWER: The schema for SchemaCrawler is the Microsoft SQL Server database + schema
-          // separatd by a dot. It may be surrounded by double quotes.
-          // .includeSchemas(schema -> Arrays.asList("User.dbo").contains(schema))
-          .includeSchemas(schema -> Arrays.asList("AdventureWorks.dbo").contains(schema))
-          .tableTypes("table");
+      final LimitOptionsBuilder limitOptionsBuilder =
+          LimitOptionsBuilder.builder()
+              // I don't know why but sql server version need .dbo to get only table what I created
+              // ANSWER: The schema for SchemaCrawler is the Microsoft SQL Server database + schema
+              // separatd by a dot. It may be surrounded by double quotes.
+              // .includeSchemas(schema -> Arrays.asList("User.dbo").contains(schema))
+              .includeSchemas(schema -> Arrays.asList("AdventureWorks.dbo").contains(schema))
+              .tableTypes("table");
       final SchemaInfoLevel schemaInfoLevel = SchemaInfoLevelBuilder.standard();
       final LoadOptionsBuilder loadOptionsBuilder =
           LoadOptionsBuilder.builder().withSchemaInfoLevel(schemaInfoLevel);
-      final SchemaCrawlerOptions schemaCrawlerOptions = SchemaCrawlerOptionsBuilder
-          .newSchemaCrawlerOptions().withLimitOptions(limitOptionsBuilder.toOptions())
-          .withLoadOptions(loadOptionsBuilder.toOptions());
+      final SchemaCrawlerOptions schemaCrawlerOptions =
+          SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions()
+              .withLimitOptions(limitOptionsBuilder.toOptions())
+              .withLoadOptions(loadOptionsBuilder.toOptions());
 
       final Catalog catalog = SchemaCrawlerUtility.getCatalog(getDatabase(), schemaCrawlerOptions);
       for (Schema schema : catalog.getSchemas()) {
@@ -85,7 +87,7 @@ public final class Main {
           result.put(table.getName(), tableData);
         }
       }
-      System.out.println(result);
+      System.out.println(result.toString(2));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -94,7 +96,7 @@ public final class Main {
   private static DatabaseConnectionSource getDatabase() {
     // "jdbc:sqlserver://localhost:1433;DatabaseName=User;encrypt=false" form
     final String url = "jdbc:sqlserver://localhost:1433;DatabaseName=AdventureWorks;encrypt=false";
-    return DatabaseConnectionSources.newDatabaseConnectionSource(url,
-        new MultiUseUserCredentials("SA", "Schem#Crawl3r")); // sql server userId and password
+    return DatabaseConnectionSources.newDatabaseConnectionSource(
+        url, new MultiUseUserCredentials("SA", "Schem#Crawl3r")); // sql server userId and password
   }
 }
